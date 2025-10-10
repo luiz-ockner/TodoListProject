@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using MediatR;
+﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using TodoList.Application.Commands;
+using TodoList.Application.DTOs;
 using TodoList.Application.Queries;
 
 namespace TodoList.Api.Controllers
@@ -23,6 +25,24 @@ namespace TodoList.Api.Controllers
 
             // O MediatR encaminha para o Handler (GetTasksQueryHandler) e retorna o resultado
             return Ok(tasks);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateTask([FromBody] CreateTaskRequest request)
+        {
+            if(!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            // 1. Cria o Command a partir do DTO de requisição
+            var command = new CreateTaskCommand(request.Title);
+
+            // 2. Envia o Command
+            var newTaskId = await _mediator.Send(command);
+
+            // 3. Retorna 201 Created com a rota para o novo recurso
+            return CreatedAtAction(nameof(GetTasks), new { id = newTaskId }, newTaskId);
         }
     }
 }
