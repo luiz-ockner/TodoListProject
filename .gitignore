@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+dist/
+
+# Environment variables
+.env
+.env.local
+
+# Docker
+*.log
+docker-compose.override.yml
+docker-compose.yaml
+
+# Visual Studio Code
+.vscode/
+
+# IDE files
+.idea/
+.DS_Store
