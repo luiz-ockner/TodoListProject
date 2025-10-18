@@ -1,5 +1,8 @@
+using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using TodoList.Application.Behaviors;
+using TodoList.Application.Commands;
 using TodoList.Application.Interfaces;
 using TodoList.Application.Queries;
 using TodoList.Infrastructure.Data;
@@ -10,6 +13,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Adicionar serviço de Banco de Dados (SQLite)
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// 1. Registro do FluentValidation: Encontra todos os validadores na assembly da Application
+builder.Services.AddValidatorsFromAssembly(typeof(CreateTaskCommand).Assembly);
+
+// 2. Registro do Pipeline Behavior: Adiciona o ValidationBehavior ao pipeline do MediatR
+// Usa a injeção de dependência para garantir que o MediatR utilize este Behavior antes de chamar o Handler.
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
 // Adicionar CORS para permitir requisições do React
 builder.Services.AddCors(options =>
@@ -54,6 +64,36 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseExceptionHandler(appBuilder =>
+{
+    appBuilder.Run(async context =>
+    {
+        var exceptionHandlerPathFeature = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerPathFeature>();
+        var exception = exceptionHandlerPathFeature?.Error;
+
+        if (exception is FluentValidation.ValidationException validationException)
+        {
+            // Define o status code 400 Bad Request
+            context.Response.StatusCode = StatusCodes.Status400BadRequest;
+            context.Response.ContentType = "application/json";
+
+            // Formata os erros de validação
+            var errors = validationException.Errors
+                .Select(error => new { Field = error.PropertyName, Message = error.ErrorMessage })
+                .ToList();
+
+            await context.Response.WriteAsJsonAsync(new
+            {
+                Title = "Uma ou mais erros de validação ocorreram.",
+                Status = 400,
+                Errors = errors
+            });
+            return;
+        }
+
+    });
+});
 
 app.UseHttpsRedirection();
 

@@ -81,6 +81,7 @@ function App() {
         ))}
       </ul>
 
+      {updateMutation.isPending && <div>Atualizando...</div>}
       {deleteMutation.isPending && <div>Excluindo tarefa...</div>}
     </div>
   )
