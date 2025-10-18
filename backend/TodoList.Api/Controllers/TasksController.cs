@@ -44,5 +44,20 @@ namespace TodoList.Api.Controllers
             // 3. Retorna 201 Created com a rota para o novo recurso
             return CreatedAtAction(nameof(GetTasks), new { id = newTaskId }, newTaskId);
         }
+
+        [HttpPatch("{id}/status")]
+        public async Task<IActionResult> UpdateTaskStatus (int id, [FromBody] bool isCompleted)
+        {
+            var command = new UpdateTaskStatusCommand(id, isCompleted);
+
+            var result = await _mediator.Send(command);
+
+            if (!result)
+            {
+                return NotFound(); // Tarefa não encontrada
+            }
+
+            return NoContent(); // Atualização bem-sucedida
+        }
     }
 }

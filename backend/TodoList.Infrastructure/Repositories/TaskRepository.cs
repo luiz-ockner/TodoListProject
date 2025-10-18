@@ -27,6 +27,11 @@ namespace TodoList.Infrastructure.Repositories
             return await _context.Tasks.ToListAsync();
         }
 
+        public async Task<Task> GetByIdAsync(int id)
+        {
+           return await _context.Tasks.SingleOrDefaultAsync(t => t.Id == id);
+        }
+
         public async System.Threading.Tasks.Task UpdateAsync(Task task)
         {
             _context.Tasks.Update(task);
