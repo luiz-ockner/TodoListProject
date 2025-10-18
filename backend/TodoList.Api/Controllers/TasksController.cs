@@ -59,5 +59,17 @@ namespace TodoList.Api.Controllers
 
             return NoContent(); // Atualização bem-sucedida
         }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteTask(int id)
+        {
+            var result = await _mediator.Send(new DeleteTaskCommand(id));
+
+            if (!result)
+            {
+                return NotFound(); // Tarefa não encontrada
+            }
+            return NoContent(); // Deleção bem-sucedida
+        }
     }
 }

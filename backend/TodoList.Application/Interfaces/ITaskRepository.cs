@@ -9,5 +9,6 @@ namespace TodoList.Application.Interfaces
         Task<Task> GetByIdAsync(int id);
         System.Threading.Tasks.Task AddAsync(Task task);
         System.Threading.Tasks.Task UpdateAsync(Task task);
+        System.Threading.Tasks.Task DeleteAsync(Task task);
     }
 }

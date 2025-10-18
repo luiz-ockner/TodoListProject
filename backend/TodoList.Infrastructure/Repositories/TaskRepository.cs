@@ -21,6 +21,12 @@ namespace TodoList.Infrastructure.Repositories
             await _context.SaveChangesAsync(); // Persiste a mudança no banco
         }
 
+        public System.Threading.Tasks.Task DeleteAsync(Task task)
+        {
+            _context.Tasks.Remove(task);
+            return _context.SaveChangesAsync();
+        }
+
         public async System.Threading.Tasks.Task<List<Task>> GetAllAsync()
         {
             // Usando ToListAsync para buscar todos os registros
